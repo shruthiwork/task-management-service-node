@@ -1,6 +1,6 @@
 import { config } from "./infrastructure/config/index.js";
 import { PinoLogger } from "./infrastructure/logger/index.js";
-import { InMemoryTaskRepository } from "./infrastructure/repositories/index.js";
+import { InMemoryTaskRepository, InMemoryUserRepository } from "./infrastructure/repositories/index.js";
 import { PgTaskRepository } from "./infrastructure/repositories/index.js";
 import { createPool, INIT_SQL } from "./infrastructure/database/index.js";
 import { createApp } from "./app.js";
@@ -24,7 +24,10 @@ async function bootstrap(): Promise<void> {
     taskRepository = new PgTaskRepository(pool);
   }
 
-  const app = createApp({ taskRepository, logger });
+  // User repository (in-memory for now; swap for PG when ready)
+  const userRepository = new InMemoryUserRepository();
+
+  const app = createApp({ taskRepository, userRepository, logger });
 
   const server = app.listen(config.PORT, () => {
     logger.info(`Server listening on port ${config.PORT}`, {
