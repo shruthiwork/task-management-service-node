@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
 import { createApp } from "../../src/app.js";
 import { InMemoryTaskRepository } from "../../src/infrastructure/repositories/in-memory-task.repository.js";
+import { InMemoryUserRepository } from "../../src/infrastructure/repositories/in-memory-user.repository.js";
 import type { Logger } from "../../src/application/interfaces/index.js";
 
 const noopLogger: Logger = {
@@ -16,7 +17,8 @@ describe("Task API", () => {
 
   beforeEach(() => {
     const taskRepository = new InMemoryTaskRepository();
-    app = createApp({ taskRepository, logger: noopLogger });
+    const userRepository = new InMemoryUserRepository();
+    app = createApp({ taskRepository, userRepository, logger: noopLogger });
   });
 
   describe("GET /health", () => {

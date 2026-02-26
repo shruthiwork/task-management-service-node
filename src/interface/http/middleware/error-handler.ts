@@ -5,6 +5,7 @@ import {
   DomainError,
   EntityNotFoundError,
   ValidationError,
+  ConflictError,
 } from "../../../domain/errors/index.js";
 import type { Logger } from "../../../application/interfaces/index.js";
 
@@ -38,6 +39,15 @@ export function createErrorHandler(logger: Logger) {
     // Not found
     if (err instanceof EntityNotFoundError) {
       res.status(StatusCodes.NOT_FOUND).json({
+        error: err.message,
+        code: err.code,
+      });
+      return;
+    }
+
+    // Conflict errors
+    if (err instanceof ConflictError) {
+      res.status(StatusCodes.CONFLICT).json({
         error: err.message,
         code: err.code,
       });

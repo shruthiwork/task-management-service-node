@@ -5,3 +5,4 @@ export type {
   ListTasksDto,
   TaskResponseDto,
 } from "./task.dto.js";
+export type { CreateUserDto, UserResponseDto } from "./user.dto.js";

@@ -4,6 +4,7 @@ import cors from "cors";
 import compression from "compression";
 import swaggerUi from "swagger-ui-express";
 import type { TaskRepository } from "./domain/repositories/index.js";
+import type { UserRepository } from "./domain/repositories/index.js";
 import type { Logger } from "./application/interfaces/index.js";
 import {
   CreateTaskUseCase,
@@ -12,11 +13,14 @@ import {
   UpdateTaskUseCase,
   UpdateTaskStatusUseCase,
   DeleteTaskUseCase,
+  CreateUserUseCase,
 } from "./application/use-cases/index.js";
 import { TaskController } from "./interface/http/controllers/index.js";
+import { UserController } from "./interface/http/controllers/index.js";
 import {
   createTaskRouter,
   createHealthRouter,
+  createUserRouter,
 } from "./interface/http/routes/index.js";
 import {
   createErrorHandler,
@@ -26,6 +30,7 @@ import { openApiSpec } from "./interface/http/swagger/index.js";
 
 export interface AppDependencies {
   taskRepository: TaskRepository;
+  userRepository: UserRepository;
   logger: Logger;
 }
 
@@ -50,7 +55,10 @@ export function createApp(deps: AppDependencies): express.Application {
   );
   const deleteTask = new DeleteTaskUseCase(deps.taskRepository, deps.logger);
 
-  // Controller
+  // User use cases
+  const createUser = new CreateUserUseCase(deps.userRepository, deps.logger);
+
+  // Controllers
   const taskController = new TaskController(
     createTask,
     getTask,
@@ -59,6 +67,7 @@ export function createApp(deps: AppDependencies): express.Application {
     updateTaskStatus,
     deleteTask
   );
+  const userController = new UserController(createUser);
 
   // Swagger UI
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
@@ -69,6 +78,7 @@ export function createApp(deps: AppDependencies): express.Application {
   // Routes
   app.use("/", createHealthRouter());
   app.use("/api/v1/tasks", createTaskRouter(taskController));
+  app.use("/api/v1/users", createUserRouter(userController));
 
   // 404 handler
   app.use((_req, res) => {
